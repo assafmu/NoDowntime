@@ -1,6 +1,7 @@
 ﻿using Connector;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,33 +13,35 @@ namespace NoDowntime
     {
         static void Main(string[] args)
         {
-            //string connectorAssemblyName = "Connector, Version=1.0.0.0,Culture=neutral,PublicKeyToken=null";
-            CopyDll("FirstImpl");
+            CopyDll("FirstImpl", "Impl.dll");
             MakeNoise();
 
-            CopyDll("SecondImpl");
+            Console.WriteLine("First complete, press any key to continue...");
+            Console.ReadKey(true);
+            CopyDll("SecondImpl", "SecondImpl.dll");
             MakeNoise();
 
-            Console.WriteLine("Press any key to continue");
+            Console.WriteLine("Press any key to finish");
             Console.ReadKey(true);
         }
-        private static void CopyDll(string projName)
+        private static void CopyDll(string projName, string dllName)
         {
-            string dynamicLibPath = Environment.CurrentDirectory + @"\Impl.dll";
+            string dynamicLibPath = Path.Combine(Environment.CurrentDirectory, dllName);
             if (File.Exists(dynamicLibPath))
             {
                 File.Delete(dynamicLibPath);
             }
-            File.Copy(@"..\..\..\" + projName + @"\bin\Debug\Impl.dll", dynamicLibPath);
+            File.Copy(@"..\..\..\" + projName + @"\bin\Debug\"+dllName, dynamicLibPath);
         }
         private static void MakeNoise()
         {
-
+            ConfigurationManager.RefreshSection("appSettings");
+            string dllName = ConfigurationManager.AppSettings["RootDll"];
+            string className = ConfigurationManager.AppSettings["RootClass"];
             AppDomainSetup info = new AppDomainSetup();
             AppDomain ad2 = AppDomain.CreateDomain("Ad2", null, info);
-            string otherAssemblyName = "Impl, Version=1.0.0.0,Culture=neutral,PublicKeyToken=null";
             RemoteFactory factory = ad2.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
-            Thing obj = factory.Create("Impl.dll", "Impl.Class1");
+            Thing obj = factory.Create(dllName, className);
             Console.WriteLine(obj.GetName());
             AppDomain.Unload(ad2);
         }

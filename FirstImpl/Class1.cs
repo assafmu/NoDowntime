@@ -1,4 +1,5 @@
 ﻿using Connector;
+using FirstDependency;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,15 @@ namespace Impl
 {
     public class Class1 : MarshalByRefObject,Thing
     {
+        public ADependency o;
+
+        public Class1()
+        {
+            o = new ADependency();
+        }
         public  string GetName()
         {
-            return "First";
+            return "First" + o.Something();
         }
     }
 }

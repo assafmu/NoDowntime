@@ -7,8 +7,8 @@
     <ProjectGuid>{1FC156FA-F12D-4892-B7D5-9E12EE7C31B4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Impl</RootNamespace>
-    <AssemblyName>Impl</AssemblyName>
+    <RootNamespace>SecondImpl</RootNamespace>
+    <AssemblyName>SecondImpl</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

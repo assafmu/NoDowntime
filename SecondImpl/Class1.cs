@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Impl
+namespace SecondImpl
 {
     public class Class1 : MarshalByRefObject, Thing
     {
