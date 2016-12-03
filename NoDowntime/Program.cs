@@ -13,37 +13,28 @@ namespace NoDowntime
     {
         static void Main(string[] args)
         {
-            CopyDll("FirstImpl", "Impl.dll");
-            MakeNoise();
+            CopyDll("FirstImpl", "Impl.dll", "Area1");
 
-            Console.WriteLine("First complete, press any key to continue...");
+            HostService host = new HostService();
+            host.Initialize();
+            host.DisplayName();
+            Console.WriteLine("Edit the configuration to the new DLL, press any key to continue...");
             Console.ReadKey(true);
-            CopyDll("SecondImpl", "SecondImpl.dll");
-            MakeNoise();
-
+            CopyDll("SecondImpl", "SecondImpl.dll", "Area2");
+            host.Recycle();
+            host.DisplayName();
             Console.WriteLine("Press any key to finish");
             Console.ReadKey(true);
         }
-        private static void CopyDll(string projName, string dllName)
+        private static void CopyDll(string projName, string dllName, string areaFolder)
         {
-            string dynamicLibPath = Path.Combine(Environment.CurrentDirectory, dllName);
+            string dynamicLibPath = Path.Combine(Environment.CurrentDirectory, areaFolder, dllName);
             if (File.Exists(dynamicLibPath))
             {
                 File.Delete(dynamicLibPath);
             }
-            File.Copy(@"..\..\..\" + projName + @"\bin\Debug\"+dllName, dynamicLibPath);
+            File.Copy(@"..\..\..\" + projName + @"\bin\Debug\" + dllName, dynamicLibPath);
         }
-        private static void MakeNoise()
-        {
-            ConfigurationManager.RefreshSection("appSettings");
-            string dllName = ConfigurationManager.AppSettings["RootDll"];
-            string className = ConfigurationManager.AppSettings["RootClass"];
-            AppDomainSetup info = new AppDomainSetup();
-            AppDomain ad2 = AppDomain.CreateDomain("Ad2", null, info);
-            RemoteFactory factory = ad2.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
-            Thing obj = factory.Create(dllName, className);
-            Console.WriteLine(obj.GetName());
-            AppDomain.Unload(ad2);
-        }
+
     }
 }

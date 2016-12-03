@@ -8,17 +8,25 @@ using System.Threading.Tasks;
 
 namespace Impl
 {
-    public class Class1 : MarshalByRefObject,Thing
+    public class Service : MarshalByRefObject,IRecycableService
     {
         public ADependency o;
 
-        public Class1()
+        public Service()
         {
             o = new ADependency();
         }
         public  string GetName()
         {
             return "First" + o.Something();
+        }
+
+        public void Start()
+        {
+        }
+
+        public void Stop()
+        {
         }
     }
 }

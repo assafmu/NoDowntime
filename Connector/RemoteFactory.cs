@@ -13,11 +13,11 @@ namespace Connector
            BindingFlags.Instance | BindingFlags.Public |
            BindingFlags.CreateInstance;
 
-        public Thing Create(string assemblyFile, string typeName,
+        public IRecycableService Create(string folder, string assemblyFile, string typeName,
                                        params object[] constructArgs)
         {
-            return (Thing)Activator.CreateInstanceFrom(
-               assemblyFile, typeName, false, bfi, null, constructArgs,
+            return (IRecycableService)Activator.CreateInstanceFrom(
+               folder+"\\"+assemblyFile, typeName, false, bfi, null, constructArgs,
                null, null).Unwrap();
         }
     }

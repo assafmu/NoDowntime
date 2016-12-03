@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Connector
 {
-    public interface Thing
+    public interface IRecycableService
     {
         string GetName();
+        void Start();
+        void Stop();
     }
 }

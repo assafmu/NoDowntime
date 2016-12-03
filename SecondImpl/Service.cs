@@ -7,11 +7,19 @@ using System.Threading.Tasks;
 
 namespace SecondImpl
 {
-    public class Class1 : MarshalByRefObject, Thing
+    public class Service : MarshalByRefObject, IRecycableService
     {
-        public  string GetName()
+        public string GetName()
         {
             return "Second";
+        }
+
+        public void Start()
+        {
+        }
+
+        public void Stop()
+        {
         }
     }
 }
