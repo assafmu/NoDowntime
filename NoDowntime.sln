@@ -15,7 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstDependency", "FirstDep
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29BA36AF-1E62-473C-A117-CD28BEA35049}"
 	ProjectSection(SolutionItems) = preProject
-		Readme.md = Readme.md
+		LICENSE.md = LICENSE.md
+		READM.md = READM.md
 	EndProjectSection
 EndProject
 Global
