@@ -58,6 +58,7 @@ namespace NoDowntime
             string areaToLoad = area1Loaded ? "Area2" : "Area1";
             currentService = factory.Create(areaToLoad, dllName, className);
             area1Loaded = !area1Loaded;
+            currentService.Start();
         }
 
 
