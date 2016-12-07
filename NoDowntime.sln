@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoDowntime", "Core\NoDownti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Connector", "Core\Connector\Connector.csproj", "{336E1303-6455-4724-A98D-825DAE662970}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleRecycleConsole", "Samples\SingleRecycleConsole\SingleRecycleConsole.csproj", "{3D4B3D52-E68D-4516-960F-164ED3F50AE7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{336E1303-6455-4724-A98D-825DAE662970}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{336E1303-6455-4724-A98D-825DAE662970}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{336E1303-6455-4724-A98D-825DAE662970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D4B3D52-E68D-4516-960F-164ED3F50AE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D4B3D52-E68D-4516-960F-164ED3F50AE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D4B3D52-E68D-4516-960F-164ED3F50AE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D4B3D52-E68D-4516-960F-164ED3F50AE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,5 +65,6 @@ Global
 		{1FC156FA-F12D-4892-B7D5-9E12EE7C31B4} = {905F79FF-19EB-48FB-AC34-C2C30F1DD2C6}
 		{AC855FE6-4727-46F0-85DA-9E2B595DD789} = {E133A4FC-883B-4881-BD3E-F1EED00194A4}
 		{336E1303-6455-4724-A98D-825DAE662970} = {E133A4FC-883B-4881-BD3E-F1EED00194A4}
+		{3D4B3D52-E68D-4516-960F-164ED3F50AE7} = {905F79FF-19EB-48FB-AC34-C2C30F1DD2C6}
 	EndGlobalSection
 EndGlobal
