@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3D4B3D52-E68D-4516-960F-164ED3F50AE7}</ProjectGuid>
+    <ProjectGuid>{5934D8D0-64C3-4106-AA27-79E6476018CE}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SingleRecycleConsole</RootNamespace>
-    <AssemblyName>SingleRecycleConsole</AssemblyName>
+    <RootNamespace>FileSystemRecycler</RootNamespace>
+    <AssemblyName>FileSystemRecycler</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

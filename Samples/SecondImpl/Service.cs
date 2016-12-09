@@ -1,6 +1,7 @@
 ﻿using Connector;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,8 @@ namespace Impl
 
         public string GetName()
         {
-            return "Second";
+            string message = ConfigurationManager.AppSettings["SampleKey"]?? "Try adding a \"SampleKey\" key to the app settings";
+            return "Second Implementation. " + message;
         }
 
         public void Start()

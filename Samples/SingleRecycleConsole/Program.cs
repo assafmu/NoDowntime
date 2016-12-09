@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Helpers.HelperMethods;
 
 namespace SingleRecycleConsole
 {
@@ -30,21 +31,5 @@ namespace SingleRecycleConsole
             Console.WriteLine("Press any key to finish");
             Console.ReadKey(true);
         }
-
-        private static void CopyDll(string projName, string dllName)
-        {
-            string targetFolder = "Staging";
-            string dynamicLibPath = Path.Combine(Environment.CurrentDirectory, targetFolder, dllName);
-            if (File.Exists(dynamicLibPath))
-            {
-                File.Delete(dynamicLibPath);
-            }
-            if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, targetFolder)))
-            {
-                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, targetFolder));
-            }
-            File.Copy(@"..\..\..\" + projName + @"\bin\Debug\" + dllName, dynamicLibPath);
-        }
-
     }
 }
