@@ -1,4 +1,5 @@
 ﻿using Connector;
+using ImplCommon;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,34 +9,42 @@ using System.Timers;
 
 namespace Impl
 {
-    public class Service : MarshalByRefObject, IRecycableService
+    public class Service : RecycableServiceBase
     {
+        public State _state;
         Timer timer;
+
         public Service()
         {
+            _state = new IntState();
             timer = new Timer();
-            timer.Interval = 5000;
-            timer.Elapsed += (o,e) => HandleTick();
+            timer.Interval = 3000;
+            timer.Elapsed += (o, e) => HandleTick();
         }
-
-        private void HandleTick()
-        {
-            Console.WriteLine("Second tick...");
-        }
-
-        public string GetName()
+        public override string GetName()
         {
             return "Second";
         }
+        private void HandleTick()
+        {
+            //_state.Number += 1;
+            _state.Bar += 1;
+            Console.WriteLine("Second tick...");
+        }
 
-        public void Start()
+        public override void Start()
         {
             timer.Start();
         }
 
-        public void Stop()
+        public override void Stop()
         {
+            Console.WriteLine("Total of {0} ticks", _state.Bar);
             timer.Stop();
+        }
+        public override void SetState(State state)
+        {
+            _state = new IntState() { Bar = state.Bar };
         }
     }
 }

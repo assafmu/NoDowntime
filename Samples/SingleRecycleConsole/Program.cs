@@ -14,7 +14,7 @@ namespace SingleRecycleConsole
     {
         static void Main(string[] args)
         {
-            CopyDll("FirstDependency", "FirstDependency.dll");
+            CopyDll("ImplCommon", "ImplCommon.dll");
             CopyDll("FirstImpl", "Impl.dll");
 
             HostService host = new HostService();
@@ -24,6 +24,7 @@ namespace SingleRecycleConsole
             host.DisplayName();
             Console.WriteLine("New Dll's will be loaded from Area2, press any key to continue...");
             Console.ReadKey(true);
+            CopyDll("ImplCommon", "ImplCommon.dll");
             CopyDll("SecondImpl", "Impl.dll");
             host.Recycle();
             host.DisplayName();

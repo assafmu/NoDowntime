@@ -11,5 +11,7 @@ namespace Connector
         string GetName();
         void Start();
         void Stop();
+        State GetState();
+        void SetState(State state);
     }
 }

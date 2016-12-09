@@ -1,5 +1,5 @@
 ﻿using Connector;
-using FirstDependency;
+using ImplCommon;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,35 +9,42 @@ using System.Timers;
 
 namespace Impl
 {
-    public class Service : MarshalByRefObject,IRecycableService
+    public class Service : RecycableServiceBase
     {
-        public ADependency o;
+        public State _state;
         Timer timer;
 
         public Service()
         {
-            o = new ADependency();
+            _state = new IntState();
             timer = new Timer();
-            timer.Interval = 5000;
+            timer.Interval = 3000;
             timer.Elapsed += (o, e) => HandleTick();
         }
-        public  string GetName()
+        public override string GetName()
         {
-            return "First" + o.Something();
+            return "First";
         }
         private void HandleTick()
         {
+            //_state.Number += 1;
+            _state.Bar += 1;
             Console.WriteLine("First tick...");
         }
 
-        public void Start()
+        public override void Start()
         {
             timer.Start();
         }
 
-        public void Stop()
+        public override void Stop()
         {
+            Console.WriteLine("Total of {0} ticks",_state.Bar);
             timer.Stop();
+        }
+        public override State GetState()
+        {
+            return _state;
         }
     }
 }

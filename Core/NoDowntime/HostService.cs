@@ -17,6 +17,7 @@ namespace NoDowntime
         private IRecycableService _currentService;
         private HotFolders _folders;
         private string _stagingFolder;
+        private State _state;
         #endregion
         #region Constructor
         public HostService()
@@ -46,7 +47,7 @@ namespace NoDowntime
         internal void Unload()
         {
             _currentService.Stop();
-            //Save the state
+            _state = _currentService.GetState();
             _currentService = null;
             AppDomain.Unload(_ad2);
         }
@@ -62,6 +63,7 @@ namespace NoDowntime
             RemoteFactory factory = _ad2.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
             _currentService = factory.Create(_folders.NextDirectory, dllName, className);
             _folders.Swap();
+            _currentService.SetState(_state);
             _currentService.Start();
         }
 
