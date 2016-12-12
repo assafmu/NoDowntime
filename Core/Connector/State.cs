@@ -8,6 +8,6 @@ namespace Connector
 {
     public abstract class State: MarshalByRefObject
     {
-        public int Bar { get; set; }
+        public byte[] Data { get; set; }
     }
 }

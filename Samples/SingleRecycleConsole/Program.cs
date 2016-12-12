@@ -28,6 +28,9 @@ namespace SingleRecycleConsole
             CopyDll("SecondImpl", "Impl.dll");
             host.Recycle();
             host.DisplayName();
+            Console.WriteLine("Service will be unloaded, press any key to continue...");
+            Console.ReadKey(true);
+            host.Close();
             Console.WriteLine("Press any key to finish");
             Console.ReadKey(true);
         }

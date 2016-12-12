@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RecycableServiceBase.cs" />
+    <Compile Include="StatelessRecycableService.cs" />
     <Compile Include="RemoteFactory.cs" />
     <Compile Include="IRecycableService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImplCommon
 {
-    public class IntState : State
+    public class EmptyState : State
     {
-        public int Number { get; set; }
     }
 }

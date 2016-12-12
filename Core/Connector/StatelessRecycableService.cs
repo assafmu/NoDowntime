@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Connector
 {
-    public abstract class RecycableServiceBase : MarshalByRefObject, IRecycableService
+    /// <summary>
+    /// An abstract class implementing the IRecycableService interface, ignoring state hand-over. 
+    /// 
+    /// </summary>
+    public abstract class StatelessRecycableService : MarshalByRefObject, IRecycableService
     {
         public abstract string GetName();
 

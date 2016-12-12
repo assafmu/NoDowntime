@@ -9,14 +9,13 @@ using System.Timers;
 
 namespace Impl
 {
-    public class Service : RecycableServiceBase
+    public class Service : StatelessRecycableService
     {
-        public State _state;
+        private int counter = 0;
         Timer timer;
 
         public Service()
         {
-            _state = new IntState();
             timer = new Timer();
             timer.Interval = 3000;
             timer.Elapsed += (o, e) => HandleTick();
@@ -27,8 +26,7 @@ namespace Impl
         }
         private void HandleTick()
         {
-            //_state.Number += 1;
-            _state.Bar += 1;
+            counter++;
             Console.WriteLine("Second tick...");
         }
 
@@ -39,12 +37,12 @@ namespace Impl
 
         public override void Stop()
         {
-            Console.WriteLine("Total of {0} ticks", _state.Bar);
+            Console.WriteLine("Total of {0} ticks", counter);
             timer.Stop();
         }
         public override void SetState(State state)
         {
-            _state = new IntState() { Bar = state.Bar };
+            counter = int.Parse(Encoding.UTF8.GetString(state.Data));
         }
     }
 }
