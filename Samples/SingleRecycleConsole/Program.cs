@@ -1,5 +1,4 @@
-﻿using Connector;
-using System;
+﻿using System;
 using NoDowntime;
 using System.Collections.Generic;
 using System.Configuration;
@@ -7,7 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Helpers.HelperMethods;
+using Recyclers;
+using static SingleRecycleConsole.HelperMethods;
 
 namespace SingleRecycleConsole
 {
@@ -15,6 +15,12 @@ namespace SingleRecycleConsole
     {
         static void Main(string[] args)
         {
+            RunFileSystemRecycler();
+        }
+
+        static void RunSingleRecycle()
+        {
+
             CopyDll("FirstDependency", "FirstDependency.dll");
             CopyDll("FirstImpl", "Impl.dll");
 
@@ -22,14 +28,34 @@ namespace SingleRecycleConsole
             Console.WriteLine("Dll's will be loaded from Area1, press any key to continue...");
             Console.ReadKey(true);
             host.Initialize();
-            host.DisplayName();
+            Console.WriteLine(host.GetName());
             Console.WriteLine("New Dll's will be loaded from Area2, press any key to continue...");
             Console.ReadKey(true);
             CopyDll("SecondImpl", "Impl.dll");
             host.Recycle();
-            host.DisplayName();
+            Console.WriteLine(host.GetName());
             Console.WriteLine("Press any key to finish");
             Console.ReadKey(true);
+
+        }
+
+        static void RunFileSystemRecycler()
+        {
+            CopyDll("FirstDependency", "FirstDependency.dll");
+            CopyDll("FirstImpl", "Impl.dll");
+            CopyDll(@"..\Core\Connector", "Connector.dll");
+
+            FileSystemRecycler recycler = new FileSystemRecycler()
+            {
+                NameCallback = Console.WriteLine
+            };
+            Console.WriteLine("Service initializing, press any key to continue...");
+            Console.ReadKey(true);
+            recycler.Start();
+            Console.WriteLine("Service will be reloaded on change to configuration files.");
+            Console.WriteLine("Press any key to finish");
+            Console.ReadKey(true);
+            recycler.Stop();
         }
     }
 }

@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HelperMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -58,9 +59,9 @@
       <Project>{ac855fe6-4727-46f0-85da-9e2b595dd789}</Project>
       <Name>NoDowntime</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Helpers\Helpers.csproj">
-      <Project>{3ffbb146-8056-4bae-a0a0-869187639525}</Project>
-      <Name>Helpers</Name>
+    <ProjectReference Include="..\FileSystemRecycler\Recyclers.csproj">
+      <Project>{5934d8d0-64c3-4106-aa27-79e6476018ce}</Project>
+      <Name>Recyclers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

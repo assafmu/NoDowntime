@@ -38,12 +38,17 @@ namespace NoDowntime
             Load();
         }
 
-        public void DisplayName()
+        public void Stop()
         {
-            Console.WriteLine(_currentService.GetName());
+            Unload();
         }
 
-        internal void Unload()
+        public string GetName()
+        {
+            return _currentService.GetName();
+        }
+
+        private void Unload()
         {
             _currentService.Stop();
             //Save the state
@@ -51,7 +56,7 @@ namespace NoDowntime
             AppDomain.Unload(_ad2);
         }
 
-        internal void Load()
+        private void Load()
         {
             DirectoryCopyAndOverwrite(_stagingFolder, _folders.NextDirectory);
             EmptyStagingFolder();
