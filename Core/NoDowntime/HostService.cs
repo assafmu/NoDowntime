@@ -13,10 +13,13 @@ namespace NoDowntime
     {
         #region fields
         private AppDomainSetup _info;
-        private AppDomain _ad2;
+        private AppDomain _currentDomain;
+        private AppDomain _nextDomain;
         private IRecycableService _currentService;
+        private IRecycableService _nextService;
         private HotFolders _folders;
         private string _stagingFolder;
+        private State _state;
         #endregion
         #region Constructor
         public HostService()
@@ -26,16 +29,25 @@ namespace NoDowntime
             _stagingFolder = "Staging";
         }
         #endregion
-        
+
         public void Initialize()
         {
+            _state = null;
             Load();
+            SwitchServiceAndDomain();
         }
-        
+
         public void Recycle()
         {
-            Unload();
+            _state = _currentService.GetState();
             Load();
+            Unload();
+            SwitchServiceAndDomain();
+        }
+
+        public void Close()
+        {
+            Unload();
         }
 
         public void Stop()
@@ -51,9 +63,8 @@ namespace NoDowntime
         private void Unload()
         {
             _currentService.Stop();
-            //Save the state
             _currentService = null;
-            AppDomain.Unload(_ad2);
+            AppDomain.Unload(_currentDomain);
         }
 
         private void Load()
@@ -63,11 +74,20 @@ namespace NoDowntime
             ConfigurationManager.RefreshSection("appSettings");
             string dllName = ConfigurationManager.AppSettings["RootDll"];
             string className = ConfigurationManager.AppSettings["RootClass"];
-            _ad2 = AppDomain.CreateDomain("Ad2", null, _info);
-            RemoteFactory factory = _ad2.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
-            _currentService = factory.Create(_folders.NextDirectory, dllName, className);
+            _nextDomain = AppDomain.CreateDomain("Ad2", null, _info);
+            RemoteFactory factory = _nextDomain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
+            _nextService = factory.Create(_folders.NextDirectory, dllName, className);
             _folders.Swap();
-            _currentService.Start();
+            _nextService.SetState(_state);
+            _nextService.Start();
+        }
+
+        private void SwitchServiceAndDomain()
+        {
+            _currentDomain = _nextDomain;
+            _currentService = _nextService;
+            _nextDomain = null;
+            _nextService = null;
         }
 
         private void EmptyStagingFolder()

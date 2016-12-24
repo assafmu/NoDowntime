@@ -7,8 +7,8 @@
     <ProjectGuid>{3E6ECA08-B6AE-467F-BB4E-8BF8BEB67F4E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FirstDependency</RootNamespace>
-    <AssemblyName>FirstDependency</AssemblyName>
+    <RootNamespace>ImplCommon</RootNamespace>
+    <AssemblyName>ImplCommon</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -40,8 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ADependency.cs" />
+    <Compile Include="EmptyState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Connector\Connector.csproj">
+      <Project>{336e1303-6455-4724-a98d-825dae662970}</Project>
+      <Name>Connector</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
