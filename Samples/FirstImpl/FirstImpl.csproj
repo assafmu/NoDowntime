@@ -48,9 +48,9 @@
       <Project>{336e1303-6455-4724-a98d-825dae662970}</Project>
       <Name>Connector</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FirstDependency\FirstDependency.csproj">
+    <ProjectReference Include="..\ImplCommon\ImplCommon.csproj">
       <Project>{3e6eca08-b6ae-467f-bb4e-8bf8beb67f4e}</Project>
-      <Name>FirstDependency</Name>
+      <Name>ImplCommon</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
