@@ -11,24 +11,75 @@ namespace NoDowntime
 {
     public class HostService
     {
-        #region fields
+        #region Fields
         private AppDomainSetup _info;
         private AppDomain _currentDomain;
         private AppDomain _nextDomain;
         private IRecycableService _currentService;
         private IRecycableService _nextService;
+        private State _state;
+
         private HotFolders _folders;
         private string _stagingFolder;
-        private State _state;
+
+        private Func<string> _classNameAccessor;
+        private Func<string> _dllNameAccessor;
         #endregion
-        #region Constructor
-        public HostService()
+
+        #region Constructors
+        /// <summary>
+        /// Constructs a HostService using the default folders (Staging, Area1, Area2).
+        /// </summary>
+        public HostService() : this(defaultStagingFolder, defaultArea1, defaultArea2)
         {
-            _folders = new HotFolders("Area1", "Area2");
+        }
+        public HostService(string dllName, string className):
+            this(defaultStagingFolder,defaultArea1,defaultArea2,dllName,className)
+        { }
+
+        public HostService(Func<string> dllNameAccessor, Func<string> classNameAccessor) :
+            this(defaultStagingFolder, defaultArea1, defaultArea2, dllNameAccessor, classNameAccessor)
+        { }
+        /// <summary>
+        /// Constructs a HostService using the specified folders. Folder names can be absolute or relative.
+        /// </summary>
+        /// <param name="stagingFolder">The folder from which the library is copied.</param>
+        /// <param name="firstFolder">The first folder copied to.</param>
+        /// <param name="secondFolder">The second folder copied to.</param>
+        public HostService(string stagingFolder, string firstFolder, string secondFolder)
+            : this(stagingFolder, firstFolder, secondFolder, GetDllNameFromConfiguration, GetClassNameFromConfiguration)
+        { }
+        /// <summary>
+        /// Constructs a HostService with the specified folders, and constant DLL name and root class name. Folder names can be absolute or relative.
+        /// </summary>
+        /// <param name="stagingFolder"></param>
+        /// <param name="firstFolder"></param>
+        /// <param name="secondFolder"></param>
+        /// <param name="dllName"></param>
+        /// <param name="className"></param>
+        public HostService(string stagingFolder, string firstFolder, string secondFolder, string dllName, string className) :
+            this(stagingFolder, firstFolder, secondFolder, () => dllName, () => className)
+        { }
+
+        /// <summary>
+        /// Constructs a HostService with the specified folders, and dynamic DLL name and root class name. Folder names can be absolute or relative.
+        /// </summary>
+        /// <param name="stagingFolder"></param>
+        /// <param name="firstFolder"></param>
+        /// <param name="secondFolder"></param>
+        /// <param name="dllNameAccessor"></param>
+        /// <param name="classNameAccessor"></param>
+        public HostService(string stagingFolder, string firstFolder, string secondFolder, Func<string> dllNameAccessor, Func<string> classNameAccessor)
+        {
             _info = new AppDomainSetup();
-            _stagingFolder = "Staging";
+            _stagingFolder = stagingFolder;
+            _folders = new HotFolders(firstFolder, secondFolder);
+            _classNameAccessor = classNameAccessor;
+            _dllNameAccessor = dllNameAccessor;
         }
         #endregion
+
+        #region Public Methods
 
         public void Initialize()
         {
@@ -45,11 +96,6 @@ namespace NoDowntime
             SwitchServiceAndDomain();
         }
 
-        public void Close()
-        {
-            Unload();
-        }
-
         public void Stop()
         {
             Unload();
@@ -59,6 +105,8 @@ namespace NoDowntime
         {
             return _currentService.GetName();
         }
+
+        #endregion
 
         private void Unload()
         {
@@ -72,14 +120,33 @@ namespace NoDowntime
             DirectoryCopyAndOverwrite(_stagingFolder, _folders.NextDirectory);
             EmptyStagingFolder();
             ConfigurationManager.RefreshSection("appSettings");
-            string dllName = ConfigurationManager.AppSettings["RootDll"];
-            string className = ConfigurationManager.AppSettings["RootClass"];
+            RefreshAdditionalConfigurationSections();
+            string dllName = _dllNameAccessor();
+            string className = _classNameAccessor();
             _nextDomain = AppDomain.CreateDomain("Ad2", null, _info);
             RemoteFactory factory = _nextDomain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
             _nextService = factory.Create(_folders.NextDirectory, dllName, className);
             _folders.Swap();
             _nextService.SetState(_state);
             _nextService.Start();
+        }
+
+
+
+        private void RefreshAdditionalConfigurationSections()
+        {
+            string additionalSections = ConfigurationManager.AppSettings["NoDowntime.RefreshedConfigurationSections"];
+            if (string.IsNullOrWhiteSpace(additionalSections))
+            {
+                return;
+            }
+            foreach (string sectionName in additionalSections.Split(';'))
+            {
+                if (ConfigurationManager.GetSection(sectionName) != null)
+                {
+                    ConfigurationManager.RefreshSection(sectionName);
+                }
+            }
         }
 
         private void SwitchServiceAndDomain()
@@ -125,6 +192,19 @@ namespace NoDowntime
             }
         }
 
+        #region Defaults
+        private static string GetDllNameFromConfiguration()
+        {
+            return ConfigurationManager.AppSettings["NoDowntime.RootDll"];
+        }
 
+        private static string GetClassNameFromConfiguration()
+        {
+            return ConfigurationManager.AppSettings["NoDowntime.RootClass"];
+        }
+        private static string defaultStagingFolder = "Staging";
+        private static string defaultArea1 = "Area1";
+        private static string defaultArea2 = "Area2";
+        #endregion
     }
 }
