@@ -26,6 +26,14 @@ namespace NoDowntime
         private Func<string> _dllNameAccessor;
         #endregion
 
+        #region Properties
+        /// <summary>
+        /// Enables recycling with an empty staging folder. If the staging folder is empty, the libraries will be copied from the current directory to the next.
+        /// False by default.
+        /// </summary>
+        public bool InPlaceRecycling { get; set; }
+        #endregion
+
         #region Constructors
         /// <summary>
         /// Constructs a HostService using the default folders (Staging, Area1, Area2).
@@ -76,6 +84,7 @@ namespace NoDowntime
             _folders = new HotFolders(firstFolder, secondFolder);
             _classNameAccessor = classNameAccessor;
             _dllNameAccessor = dllNameAccessor;
+            InPlaceRecycling = _defaultInPlaceRecycling;
         }
         #endregion
 
@@ -117,7 +126,14 @@ namespace NoDowntime
 
         private void Load()
         {
-            DirectoryCopyAndOverwrite(_stagingFolder, _folders.NextDirectory);
+            if (Directory.EnumerateFileSystemEntries(_stagingFolder).Any())
+            {
+                DirectoryCopyAndOverwrite(_stagingFolder, _folders.NextDirectory);
+            }
+            else if (InPlaceRecycling)
+            {
+                DirectoryCopyAndOverwrite(_folders.CurrentDirectory, _folders.NextDirectory);
+            }
             EmptyStagingFolder();
             ConfigurationManager.RefreshSection("appSettings");
             RefreshAdditionalConfigurationSections();
@@ -205,6 +221,7 @@ namespace NoDowntime
         private static string defaultStagingFolder = "Staging";
         private static string defaultArea1 = "Area1";
         private static string defaultArea2 = "Area2";
+        private static bool _defaultInPlaceRecycling = false;
         #endregion
     }
 }

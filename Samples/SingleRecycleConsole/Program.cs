@@ -15,8 +15,8 @@ namespace SingleRecycleConsole
     {
         static void Main(string[] args)
         {
-            //RunFileSystemRecycler();
-            RunSingleRecycle();
+            RunFileSystemRecycler();
+            //RunSingleRecycle();
         }
 
         static void RunSingleRecycle()
@@ -50,7 +50,10 @@ namespace SingleRecycleConsole
             CopyDll("FirstImpl", "Impl.dll");
             CopyDll("ImplCommon", "ImplCommon.dll");
             CopyDll(@"..\Core\Connector", "Connector.dll");
-            HostService host = new HostService("Impl.dll","Impl.Service");
+            HostService host = new HostService("Impl.dll", "Impl.Service")
+            {
+                InPlaceRecycling = true
+            };
             FileSystemRecycler recycler = new FileSystemRecycler(host)
             {
                 NameCallback = Console.WriteLine
