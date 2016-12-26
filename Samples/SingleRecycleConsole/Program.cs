@@ -15,7 +15,8 @@ namespace SingleRecycleConsole
     {
         static void Main(string[] args)
         {
-            RunFileSystemRecycler();
+            //RunFileSystemRecycler();
+            RunSingleRecycle();
         }
 
         static void RunSingleRecycle()
@@ -23,6 +24,7 @@ namespace SingleRecycleConsole
 
             CopyDll("FirstDependency", "FirstDependency.dll");
             CopyDll("FirstImpl", "Impl.dll");
+            CopyDll("ImplCommon", "ImplCommon.dll");
 
             HostService host = new HostService();
             Console.WriteLine("Dll's will be loaded from Area1, press any key to continue...");
@@ -32,6 +34,7 @@ namespace SingleRecycleConsole
             Console.WriteLine("New Dll's will be loaded from Area2, press any key to continue...");
             Console.ReadKey(true);
             CopyDll("SecondImpl", "Impl.dll");
+            CopyDll("ImplCommon", "ImplCommon.dll");
             host.Recycle();
             Console.WriteLine(host.GetName());
             Console.WriteLine("Press any key to finish");
@@ -43,6 +46,7 @@ namespace SingleRecycleConsole
         {
             CopyDll("FirstDependency", "FirstDependency.dll");
             CopyDll("FirstImpl", "Impl.dll");
+            CopyDll("ImplCommon", "ImplCommon.dll");
             CopyDll(@"..\Core\Connector", "Connector.dll");
 
             FileSystemRecycler recycler = new FileSystemRecycler()
