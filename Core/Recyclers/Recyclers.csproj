@@ -50,14 +50,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Core\Connector\Connector.csproj">
+    <ProjectReference Include="..\Connector\Connector.csproj">
       <Project>{336e1303-6455-4724-a98d-825dae662970}</Project>
       <Name>Connector</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Core\NoDowntime\NoDowntime.csproj">
+    <ProjectReference Include="..\NoDowntime\NoDowntime.csproj">
       <Project>{ac855fe6-4727-46f0-85da-9e2b595dd789}</Project>
       <Name>NoDowntime</Name>
     </ProjectReference>

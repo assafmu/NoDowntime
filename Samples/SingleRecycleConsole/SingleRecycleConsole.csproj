@@ -59,7 +59,7 @@
       <Project>{ac855fe6-4727-46f0-85da-9e2b595dd789}</Project>
       <Name>NoDowntime</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FileSystemRecycler\Recyclers.csproj">
+    <ProjectReference Include="..\..\Core\Recyclers\Recyclers.csproj">
       <Project>{5934d8d0-64c3-4106-aa27-79e6476018ce}</Project>
       <Name>Recyclers</Name>
     </ProjectReference>
