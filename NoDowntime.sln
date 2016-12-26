@@ -6,7 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29BA36AF-1E62-473C-A117-CD28BEA35049}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.md = LICENSE.md
-		READM.md = READM.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{E133A4FC-883B-4881-BD3E-F1EED00194A4}"

@@ -4,19 +4,34 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Recyclers
 {
     public class FileSystemRecycler
     {
-        //FileSystemWatcher can fire multiple events for what is usually considered a single event.
-        //As a workaround, we ignore events within this timespan.
-        static readonly TimeSpan minDelayBetweenEvents = TimeSpan.FromSeconds(1);
+
+        #region Private Fields
         private readonly FileSystemWatcher fsw;
         private readonly HostService _service;
         private Action<string> _nameCallback = null;
 
+        #endregion
+        #region Public Members
+
+        /// <summary>
+        /// Defines the minimal time between recycles fired by changes to the file system. Since the file system fires multiple events for each change, it is important to keep this non-zero.
+        /// 1 second by default.
+        /// </summary>
+        public TimeSpan MinTimeBetweenRecycles = TimeSpan.FromSeconds(1);
+        /// <summary>
+        /// An optional delay between the change to the file system and the actual recycle. Zero by default.
+        /// </summary>
+        public TimeSpan RecycleDelay = TimeSpan.Zero;
+        /// <summary>
+        /// Called on recycling, with the name of the loaded service. Can be used for logging recycles, for example. No action by default.
+        /// </summary>
         public Action<string> NameCallback
         {
             get
@@ -29,14 +44,19 @@ namespace Recyclers
             }
         }
 
+        #endregion
+
+        #region Ctors
         public FileSystemRecycler(HostService service)
         {
             _service = service;
             fsw = new FileSystemWatcher("./", "*.config");
         }
-        public FileSystemRecycler():this(new HostService())
+        public FileSystemRecycler() : this(new HostService())
         {
-        }
+        } 
+        #endregion
+
         public void Start()
         {
             _service.Initialize();
@@ -56,10 +76,15 @@ namespace Recyclers
         private void RecycleOnConfigChange(HostService host)
         {
             DateTime lastEventTime = DateTime.Now;
+
             fsw.Changed += (o, e) =>
              {
-                 if (DateTime.Now - lastEventTime > minDelayBetweenEvents)
+                 if (DateTime.Now - lastEventTime > MinTimeBetweenRecycles)
                  {
+                     if (RecycleDelay != TimeSpan.Zero)
+                     {
+                         Thread.Sleep(RecycleDelay);
+                     }
                      lastEventTime = DateTime.Now;
                      Console.WriteLine("Recycling!");
                      host.Recycle();

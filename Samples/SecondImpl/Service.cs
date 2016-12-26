@@ -2,6 +2,7 @@
 using ImplCommon;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,8 @@ namespace Impl
         }
         public override string GetName()
         {
-            return "Second";
+            string message = ConfigurationManager.AppSettings["Message"] ?? "Try editing the Message AppSetting to display a message!";
+            return "Second "+ message;
         }
         private void HandleTick()
         {
