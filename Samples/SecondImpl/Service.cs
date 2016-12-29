@@ -42,8 +42,20 @@ namespace Impl
             Console.WriteLine("Total of {0} ticks", counter);
             timer.Stop();
         }
+        public override State GetState()
+        {
+            return new EmptyState()
+            {
+                Data = Encoding.UTF8.GetBytes(counter.ToString())
+            };
+        }
         public override void SetState(State state)
         {
+            if (state == null)
+            {
+                counter = 0;
+                return;
+            }
             counter = int.Parse(Encoding.UTF8.GetString(state.Data));
         }
     }

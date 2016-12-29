@@ -47,5 +47,14 @@ namespace Impl
                 Data = Encoding.UTF8.GetBytes(counter.ToString())
             };
         }
+        public override void SetState(State state)
+        {
+            if (state == null)
+            {
+                counter = 0;
+                return;
+            }
+            counter = int.Parse(Encoding.UTF8.GetString(state.Data));
+        }
     }
 }

@@ -93,14 +93,39 @@ namespace NoDowntime
         public void Initialize()
         {
             _state = null;
-            Load();
+            string librariesDirectory = null;
+            string targetDirectory = null;
+            if (DirectoryExistsAndNotEmpty(_stagingFolder)) // default common behaviour
+            {
+                librariesDirectory = _stagingFolder;
+                targetDirectory = _folders.NextDirectory;
+            }
+            else if (DirectoryExistsAndNotEmpty(_folders.NextDirectory))
+            {
+                librariesDirectory = _folders.NextDirectory;
+                targetDirectory = _folders.NextDirectory;
+            }
+            else
+            {
+                librariesDirectory = _folders.CurrentDirectory;
+                targetDirectory = _folders.CurrentDirectory;
+            }
+            Load(librariesDirectory, targetDirectory);
             SwitchServiceAndDomain();
         }
 
         public void Recycle()
         {
             _state = _currentService.GetState();
-            Load();
+            if (DirectoryExistsAndNotEmpty(_stagingFolder)) // default common behaviour
+            {
+                Load(_stagingFolder, _folders.NextDirectory);
+            }
+            else if (InPlaceRecycling)
+            {
+                Load(_folders.CurrentDirectory, _folders.NextDirectory);
+            }
+
             Unload();
             SwitchServiceAndDomain();
         }
@@ -124,15 +149,11 @@ namespace NoDowntime
             AppDomain.Unload(_currentDomain);
         }
 
-        private void Load()
+        private void Load(string librariesDirectory, string targetDirectory)
         {
-            if (Directory.EnumerateFileSystemEntries(_stagingFolder).Any())
+            if (librariesDirectory != targetDirectory)
             {
-                DirectoryCopyAndOverwrite(_stagingFolder, _folders.NextDirectory);
-            }
-            else if (InPlaceRecycling)
-            {
-                DirectoryCopyAndOverwrite(_folders.CurrentDirectory, _folders.NextDirectory);
+                DirectoryCopyAndOverwrite(librariesDirectory, targetDirectory);
             }
             EmptyStagingFolder();
             ConfigurationManager.RefreshSection("appSettings");
@@ -141,7 +162,7 @@ namespace NoDowntime
             string className = _classNameAccessor();
             _nextDomain = AppDomain.CreateDomain("Ad2", null, _info);
             RemoteFactory factory = _nextDomain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
-            _nextService = factory.Create(_folders.NextDirectory, dllName, className);
+            _nextService = factory.Create(targetDirectory, dllName, className);
             _folders.Swap();
             _nextService.SetState(_state);
             _nextService.Start();
@@ -175,6 +196,10 @@ namespace NoDowntime
 
         private void EmptyStagingFolder()
         {
+            if (!DirectoryExistsAndNotEmpty(_stagingFolder))
+            {
+                return;
+            }
             System.IO.DirectoryInfo di = new DirectoryInfo(_stagingFolder);
 
             foreach (FileInfo file in di.GetFiles())
@@ -199,13 +224,18 @@ namespace NoDowntime
             FileInfo[] files = directory.GetFiles();
             foreach (FileInfo file in files)
             {
-                file.CopyTo(Path.Combine(destDirName, file.Name), false);
+                file.CopyTo(Path.Combine(destDirName, file.Name), true);
             }
             foreach (DirectoryInfo subDirectory in directories)
             {
                 string temppath = Path.Combine(destDirName, subDirectory.Name);
                 DirectoryCopyAndOverwrite(subDirectory.FullName, temppath);
             }
+        }
+
+        private bool DirectoryExistsAndNotEmpty(string path)
+        {
+            return Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any();
         }
 
         #region Defaults
