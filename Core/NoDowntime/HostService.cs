@@ -17,7 +17,6 @@ namespace NoDowntime
         private AppDomain _nextDomain;
         private IRecycableService _currentService;
         private IRecycableService _nextService;
-        private State _state;
 
         private HotFolders _folders;
         private string _stagingFolder;
@@ -41,8 +40,8 @@ namespace NoDowntime
         public HostService() : this(defaultStagingFolder, defaultArea1, defaultArea2)
         {
         }
-        public HostService(string dllName, string className):
-            this(defaultStagingFolder,defaultArea1,defaultArea2,dllName,className)
+        public HostService(string dllName, string className) :
+            this(defaultStagingFolder, defaultArea1, defaultArea2, dllName, className)
         { }
 
         public HostService(Func<string> dllNameAccessor, Func<string> classNameAccessor) :
@@ -92,38 +91,32 @@ namespace NoDowntime
 
         public void Initialize()
         {
-            _state = null;
-            string librariesDirectory = null;
-            string targetDirectory = null;
+
             if (DirectoryExistsAndNotEmpty(_stagingFolder)) // default common behaviour
             {
-                librariesDirectory = _stagingFolder;
-                targetDirectory = _folders.NextDirectory;
+                Load(_stagingFolder, _folders.NextDirectory);
             }
             else if (DirectoryExistsAndNotEmpty(_folders.NextDirectory))
             {
-                librariesDirectory = _folders.NextDirectory;
-                targetDirectory = _folders.NextDirectory;
+                Load(_folders.NextDirectory, _folders.NextDirectory);
             }
             else
             {
-                librariesDirectory = _folders.CurrentDirectory;
-                targetDirectory = _folders.CurrentDirectory;
+                Load(_folders.CurrentDirectory, _folders.CurrentDirectory);
             }
-            Load(librariesDirectory, targetDirectory);
             SwitchServiceAndDomain();
         }
 
         public void Recycle()
         {
-            _state = _currentService.GetState();
+            State state = _currentService.GetState();
             if (DirectoryExistsAndNotEmpty(_stagingFolder)) // default common behaviour
             {
-                Load(_stagingFolder, _folders.NextDirectory);
+                Load(_stagingFolder, _folders.NextDirectory, state);
             }
             else if (InPlaceRecycling)
             {
-                Load(_folders.CurrentDirectory, _folders.NextDirectory);
+                Load(_folders.CurrentDirectory, _folders.NextDirectory, state);
             }
 
             Unload();
@@ -149,7 +142,7 @@ namespace NoDowntime
             AppDomain.Unload(_currentDomain);
         }
 
-        private void Load(string librariesDirectory, string targetDirectory)
+        private void Load(string librariesDirectory, string targetDirectory, State state = null)
         {
             if (librariesDirectory != targetDirectory)
             {
@@ -164,11 +157,9 @@ namespace NoDowntime
             RemoteFactory factory = _nextDomain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
             _nextService = factory.Create(targetDirectory, dllName, className);
             _folders.Swap();
-            _nextService.SetState(_state);
+            _nextService.SetState(state);
             _nextService.Start();
         }
-
-
 
         private void RefreshAdditionalConfigurationSections()
         {
