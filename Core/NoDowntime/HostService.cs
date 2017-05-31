@@ -1,4 +1,5 @@
 ﻿using Connector;
+using NoDowntime.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -13,6 +14,8 @@ namespace NoDowntime
     {
         #region Fields
         private AppDomainSetup _info;
+        private readonly IDirectory _directoryWrapper;
+        private readonly IConfiguration _config;
         private AppDomain _currentDomain;
         private AppDomain _nextDomain;
         private IRecycableService _currentService;
@@ -21,8 +24,8 @@ namespace NoDowntime
         private HotFolders _folders;
         private string _stagingFolder;
 
-        private Func<string> _classNameAccessor;
-        private Func<string> _dllNameAccessor;
+        private string _className;
+        private string _dllName;
         #endregion
 
         #region Properties
@@ -43,10 +46,6 @@ namespace NoDowntime
         public HostService(string dllName, string className) :
             this(defaultStagingFolder, defaultArea1, defaultArea2, dllName, className)
         { }
-
-        public HostService(Func<string> dllNameAccessor, Func<string> classNameAccessor) :
-            this(defaultStagingFolder, defaultArea1, defaultArea2, dllNameAccessor, classNameAccessor)
-        { }
         /// <summary>
         /// Constructs a HostService using the specified folders. Folder names can be absolute or relative.
         /// </summary>
@@ -54,7 +53,7 @@ namespace NoDowntime
         /// <param name="firstFolder">The first folder copied to.</param>
         /// <param name="secondFolder">The second folder copied to.</param>
         public HostService(string stagingFolder, string firstFolder, string secondFolder)
-            : this(stagingFolder, firstFolder, secondFolder, GetDllNameFromConfiguration, GetClassNameFromConfiguration)
+            : this(stagingFolder, firstFolder, secondFolder, null, null)
         { }
         /// <summary>
         /// Constructs a HostService with the specified folders, and constant DLL name and root class name. Folder names can be absolute or relative.
@@ -64,26 +63,21 @@ namespace NoDowntime
         /// <param name="secondFolder"></param>
         /// <param name="dllName"></param>
         /// <param name="className"></param>
-        public HostService(string stagingFolder, string firstFolder, string secondFolder, string dllName, string className) :
-            this(stagingFolder, firstFolder, secondFolder, () => dllName, () => className)
-        { }
+        public HostService(string stagingFolder, string firstFolder, string secondFolder, string dllName, string className) 
+            : this(stagingFolder, firstFolder, secondFolder, dllName, className, new Wrappers.Directory(), new Wrappers.Configuration())
+        {
+        }
 
-        /// <summary>
-        /// Constructs a HostService with the specified folders, and dynamic DLL name and root class name. Folder names can be absolute or relative.
-        /// </summary>
-        /// <param name="stagingFolder"></param>
-        /// <param name="firstFolder"></param>
-        /// <param name="secondFolder"></param>
-        /// <param name="dllNameAccessor"></param>
-        /// <param name="classNameAccessor"></param>
-        public HostService(string stagingFolder, string firstFolder, string secondFolder, Func<string> dllNameAccessor, Func<string> classNameAccessor)
+        internal HostService(string stagingFolder, string firstFolder, string secondFolder, string dllName, string className, IDirectory dw, IConfiguration config)
         {
             _info = new AppDomainSetup();
             _stagingFolder = stagingFolder;
             _folders = new HotFolders(firstFolder, secondFolder);
-            _classNameAccessor = classNameAccessor;
-            _dllNameAccessor = dllNameAccessor;
+            _className = className ?? GetClassNameFromConfiguration();
+            _dllName = dllName ?? GetDllNameFromConfiguration();
             InPlaceRecycling = _defaultInPlaceRecycling;
+            _directoryWrapper = dw;
+            _config = config;
         }
         #endregion
 
@@ -150,29 +144,27 @@ namespace NoDowntime
                 DirectoryCopyAndOverwrite(librariesDirectory, targetDirectory);
             }
             EmptyStagingFolder();
-            ConfigurationManager.RefreshSection("appSettings");
+            _config.RefreshSection("appSettings");
             RefreshAdditionalConfigurationSections();
-            string dllName = _dllNameAccessor();
-            string className = _classNameAccessor();
             _nextDomain = AppDomain.CreateDomain("Ad2", null, _info);
             RemoteFactory factory = _nextDomain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
-            _nextService = factory.Create(targetDirectory, dllName, className);
+            _nextService = factory.Create(targetDirectory, _dllName, _className);
             _nextService.SetState(state);
             _nextService.Start();
         }
 
         private void RefreshAdditionalConfigurationSections()
         {
-            string additionalSections = ConfigurationManager.AppSettings["NoDowntime.RefreshedConfigurationSections"];
+            string additionalSections = _config.AppSettings["NoDowntime.RefreshedConfigurationSections"];
             if (string.IsNullOrWhiteSpace(additionalSections))
             {
                 return;
             }
             foreach (string sectionName in additionalSections.Split(';'))
             {
-                if (ConfigurationManager.GetSection(sectionName) != null)
+                if (_config.GetSection(sectionName) != null)
                 {
-                    ConfigurationManager.RefreshSection(sectionName);
+                    _config.RefreshSection(sectionName);
                 }
             }
         }
@@ -207,11 +199,11 @@ namespace NoDowntime
         {
             DirectoryInfo directory = new DirectoryInfo(sourceDirName);
             DirectoryInfo[] directories = directory.GetDirectories();
-            if (Directory.Exists(destDirName))
+            if (_directoryWrapper.Exists(destDirName))
             {
-                Directory.Delete(destDirName, true);    //Delete contents recursively.
+                _directoryWrapper.Delete(destDirName, true);    //Delete contents recursively.
             }
-            Directory.CreateDirectory(destDirName);
+            _directoryWrapper.CreateDirectory(destDirName);
             FileInfo[] files = directory.GetFiles();
             foreach (FileInfo file in files)
             {
@@ -226,18 +218,18 @@ namespace NoDowntime
 
         private bool DirectoryExistsAndNotEmpty(string path)
         {
-            return Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any();
+            return _directoryWrapper.Exists(path) && _directoryWrapper.EnumerateFileSystemEntries(path).Any();
         }
 
         #region Defaults
-        private static string GetDllNameFromConfiguration()
+        private string GetDllNameFromConfiguration()
         {
-            return ConfigurationManager.AppSettings["NoDowntime.RootDll"];
+            return _config.AppSettings["NoDowntime.RootDll"];
         }
 
-        private static string GetClassNameFromConfiguration()
+        private string GetClassNameFromConfiguration()
         {
-            return ConfigurationManager.AppSettings["NoDowntime.RootClass"];
+            return _config.AppSettings["NoDowntime.RootClass"];
         }
         private static string defaultStagingFolder = "Staging";
         private static string defaultArea1 = "Area1";
