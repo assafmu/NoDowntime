@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImplCommon", "Samples\ImplC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclers", "Core\Recyclers\Recyclers.csproj", "{5934D8D0-64C3-4106-AA27-79E6476018CE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{BC931E58-2529-47FB-9DA9-2D2E0EC6B936}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoDowntime.UnitTests", "NoDowntime.UnitTests\NoDowntime.UnitTests.csproj", "{9C00EB03-406E-48D9-9F4D-66B537519ECA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +65,10 @@ Global
 		{5934D8D0-64C3-4106-AA27-79E6476018CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5934D8D0-64C3-4106-AA27-79E6476018CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5934D8D0-64C3-4106-AA27-79E6476018CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C00EB03-406E-48D9-9F4D-66B537519ECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C00EB03-406E-48D9-9F4D-66B537519ECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C00EB03-406E-48D9-9F4D-66B537519ECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C00EB03-406E-48D9-9F4D-66B537519ECA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,5 +81,6 @@ Global
 		{3D4B3D52-E68D-4516-960F-164ED3F50AE7} = {905F79FF-19EB-48FB-AC34-C2C30F1DD2C6}
 		{3E6ECA08-B6AE-467F-BB4E-8BF8BEB67F4E} = {905F79FF-19EB-48FB-AC34-C2C30F1DD2C6}
 		{5934D8D0-64C3-4106-AA27-79E6476018CE} = {E133A4FC-883B-4881-BD3E-F1EED00194A4}
+		{9C00EB03-406E-48D9-9F4D-66B537519ECA} = {BC931E58-2529-47FB-9DA9-2D2E0EC6B936}
 	EndGlobalSection
 EndGlobal

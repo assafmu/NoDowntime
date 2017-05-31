@@ -11,7 +11,7 @@ namespace NoDowntime
         #region Fields
         private string _area1;
         private string _area2;
-        private bool _isArea1 = false;
+        private bool _isArea1 = true;
         #endregion
         public HotFolders(string initialFolder,string swapFolder)
         {

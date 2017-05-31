@@ -94,15 +94,15 @@ namespace NoDowntime
 
             if (DirectoryExistsAndNotEmpty(_stagingFolder)) // default common behaviour
             {
-                Load(_stagingFolder, _folders.NextDirectory);
+                Load(_stagingFolder, _folders.CurrentDirectory);
             }
-            else if (DirectoryExistsAndNotEmpty(_folders.NextDirectory))
+            else if (DirectoryExistsAndNotEmpty(_folders.CurrentDirectory))
             {
-                Load(_folders.NextDirectory, _folders.NextDirectory);
+                Load(_folders.NextDirectory, _folders.CurrentDirectory);
             }
             else
             {
-                Load(_folders.CurrentDirectory, _folders.CurrentDirectory);
+                Load(_folders.CurrentDirectory, _folders.NextDirectory);
             }
             SwitchServiceAndDomain();
         }
@@ -120,6 +120,7 @@ namespace NoDowntime
             }
 
             Unload();
+            _folders.Swap();
             SwitchServiceAndDomain();
         }
 
@@ -156,7 +157,6 @@ namespace NoDowntime
             _nextDomain = AppDomain.CreateDomain("Ad2", null, _info);
             RemoteFactory factory = _nextDomain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
             _nextService = factory.Create(targetDirectory, dllName, className);
-            _folders.Swap();
             _nextService.SetState(state);
             _nextService.Start();
         }
