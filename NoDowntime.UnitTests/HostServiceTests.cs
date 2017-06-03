@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NoDowntime.Wrappers;
 using Connector;
+using FluentAssertions;
 
 namespace NoDowntime.UnitTests
 {
@@ -16,35 +17,69 @@ namespace NoDowntime.UnitTests
         private Mock<DirInfo> _stagingDir;
         private Mock<FileInfo> _dllInfo;
         private Mock<IApplicationDomain> _appDomain;
+        private string stagingFolder = "staging";
+        private string className;
+        private string dllName;
+        private string dllFileName;
 
         [TestInitialize]
         public void Initialize()
         {
+            className = "class";
+            dllName = "dll";
+            dllFileName = dllName + ".dll";
             _directory = new Mock<IDirectory>();
             _config = new Mock<IConfiguration>();
             _domainFactory = new Mock<IAppDomainFactory>();
             _stagingDir = new Mock<DirInfo>();
             _dllInfo = new Mock<FileInfo>();
             _appDomain = new Mock<IApplicationDomain>();
-            _hostService = new HostService("staging", "1", "2", "dll", "class", _directory.Object, _config.Object,_domainFactory.Object);
+            InitializeConfiguration();
+            InitializeFileSystem();
+            InitializeRecycableService();
+            _hostService = new HostService(stagingFolder, "1", "2", dllName, className, _directory.Object, _config.Object, _domainFactory.Object);
         }
-        [TestMethod]
-        public void HostService_Initialize_CreatesAppDomain()
+
+        public void InitializeConfiguration()
         {
-            _directory.Setup(dir => dir.Exists("staging")).Returns(true);
-            _directory.Setup(dir => dir.EnumerateFileSystemEntries("staging")).Returns(new string[] { "a" });
-            _directory.Setup(dir => dir.Get("staging")).Returns(_stagingDir.Object);
-            _stagingDir.Setup(dir => dir.GetDirectories()).Returns(new DirInfo[0]);
-            _stagingDir.Setup(dir => dir.GetFiles()).Returns(new FileInfo[] { _dllInfo.Object });
-            _dllInfo.Setup(file => file.Name).Returns("a");
             var appSettings = new System.Collections.Specialized.NameValueCollection();
             appSettings["NoDowntime.RefreshedConfigurationSections"] = "";
             _config.Setup(c => c.AppSettings).Returns(appSettings);
+        }
+
+        public void InitializeFileSystem()
+        {
+            _directory.Setup(dir => dir.Exists(stagingFolder)).Returns(true);
+            _directory.Setup(dir => dir.EnumerateFileSystemEntries(stagingFolder)).Returns(new string[] { dllFileName });
+            _directory.Setup(dir => dir.Get(stagingFolder)).Returns(_stagingDir.Object);
+            _stagingDir.Setup(dir => dir.GetDirectories()).Returns(new DirInfo[0]);
+            _stagingDir.Setup(dir => dir.GetFiles()).Returns(new FileInfo[] { _dllInfo.Object });
+            _dllInfo.Setup(file => file.Name).Returns(dllFileName);
+        }
+
+        public void InitializeRecycableService()
+        {
             _domainFactory.Setup(factory => factory.CreateDomain(It.IsAny<string>(), null, It.IsAny<AppDomainSetup>())).Returns(_appDomain.Object);
             var service = new Mock<IRecycableService>();
-            var remoteFactory = Mock.Of<RemoteFactory>(rf => rf.Create(It.IsAny<string>(),"dll","class",It.IsAny<object[]>()) == service.Object);
+            var remoteFactory = Mock.Of<RemoteFactory>(rf => rf.Create(It.IsAny<string>(), dllName, className, It.IsAny<object[]>()) == service.Object);
             _appDomain.Setup(domain => domain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory")).Returns(remoteFactory);
-            _hostService.Initialize();
+        }
+
+        [TestMethod]
+        public void HostService_Initialize_CreatesAppDomain()
+        {
+            Action serviceInitialization = () => _hostService.Initialize();
+            serviceInitialization.ShouldNotThrow();
+        }
+
+        [TestMethod]
+        public void HostService_Initialize_RefreshesMultipleConfigurationSections()
+        {
+            var appSettings = new System.Collections.Specialized.NameValueCollection();
+            appSettings["NoDowntime.RefreshedConfigurationSections"] = "a;b";
+            _config.Setup(c => c.AppSettings).Returns(appSettings).Verifiable();
+            _config.Setup(c => c.RefreshSection("a")).Verifiable();
+            _config.Setup(c => c.RefreshSection("b")).Verifiable();
         }
     }
 }
