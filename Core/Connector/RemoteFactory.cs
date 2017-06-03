@@ -13,7 +13,7 @@ namespace Connector
            BindingFlags.Instance | BindingFlags.Public |
            BindingFlags.CreateInstance;
 
-        public IRecycableService Create(string folder, string assemblyFile, string typeName,
+        public virtual IRecycableService Create(string folder, string assemblyFile, string typeName,
                                        params object[] constructArgs)
         {
             return (IRecycableService)Activator.CreateInstanceFrom(

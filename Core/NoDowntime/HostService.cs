@@ -1,23 +1,19 @@
 ﻿using Connector;
 using NoDowntime.Wrappers;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NoDowntime
 {
-    public class HostService
+    public class HostService : IHostService
     {
         #region Fields
         private AppDomainSetup _info;
         private readonly IDirectory _directoryWrapper;
         private readonly IConfiguration _config;
-        private AppDomain _currentDomain;
-        private AppDomain _nextDomain;
+        private readonly IAppDomainFactory _appDomainFactory;
+        private IApplicationDomain _currentDomain;
+        private IApplicationDomain _nextDomain;
         private IRecycableService _currentService;
         private IRecycableService _nextService;
 
@@ -64,11 +60,11 @@ namespace NoDowntime
         /// <param name="dllName"></param>
         /// <param name="className"></param>
         public HostService(string stagingFolder, string firstFolder, string secondFolder, string dllName, string className) 
-            : this(stagingFolder, firstFolder, secondFolder, dllName, className, new Wrappers.Directory(), new Wrappers.Configuration())
+            : this(stagingFolder, firstFolder, secondFolder, dllName, className, new Wrappers.Directory(), new Wrappers.Configuration(),new AppDomainFactory())
         {
         }
 
-        internal HostService(string stagingFolder, string firstFolder, string secondFolder, string dllName, string className, IDirectory dw, IConfiguration config)
+        internal HostService(string stagingFolder, string firstFolder, string secondFolder, string dllName, string className, IDirectory dw, IConfiguration config, IAppDomainFactory appDomainFactory)
         {
             _info = new AppDomainSetup();
             _stagingFolder = stagingFolder;
@@ -78,6 +74,7 @@ namespace NoDowntime
             InPlaceRecycling = _defaultInPlaceRecycling;
             _directoryWrapper = dw;
             _config = config;
+            _appDomainFactory = appDomainFactory;
         }
         #endregion
 
@@ -134,7 +131,7 @@ namespace NoDowntime
         {
             _currentService.Stop();
             _currentService = null;
-            AppDomain.Unload(_currentDomain);
+            _currentDomain.Unload();
         }
 
         private void Load(string librariesDirectory, string targetDirectory, State state = null)
@@ -146,7 +143,7 @@ namespace NoDowntime
             EmptyStagingFolder();
             _config.RefreshSection("appSettings");
             RefreshAdditionalConfigurationSections();
-            _nextDomain = AppDomain.CreateDomain("Ad2", null, _info);
+            _nextDomain = _appDomainFactory.CreateDomain("Ad2", null, _info);
             RemoteFactory factory = _nextDomain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory") as RemoteFactory;
             _nextService = factory.Create(targetDirectory, _dllName, _className);
             _nextService.SetState(state);
@@ -183,13 +180,13 @@ namespace NoDowntime
             {
                 return;
             }
-            System.IO.DirectoryInfo di = new DirectoryInfo(_stagingFolder);
+            DirInfo di = _directoryWrapper.Get(_stagingFolder);
 
             foreach (FileInfo file in di.GetFiles())
             {
                 file.Delete();
             }
-            foreach (DirectoryInfo dir in di.GetDirectories())
+            foreach (DirInfo dir in di.GetDirectories())
             {
                 dir.Delete(true);
             }
@@ -197,8 +194,8 @@ namespace NoDowntime
 
         private void DirectoryCopyAndOverwrite(string sourceDirName, string destDirName)
         {
-            DirectoryInfo directory = new DirectoryInfo(sourceDirName);
-            DirectoryInfo[] directories = directory.GetDirectories();
+            DirInfo directory =_directoryWrapper.Get(sourceDirName);
+            DirInfo[] directories = directory.GetDirectories();
             if (_directoryWrapper.Exists(destDirName))
             {
                 _directoryWrapper.Delete(destDirName, true);    //Delete contents recursively.
@@ -207,11 +204,11 @@ namespace NoDowntime
             FileInfo[] files = directory.GetFiles();
             foreach (FileInfo file in files)
             {
-                file.CopyTo(Path.Combine(destDirName, file.Name), true);
+                file.CopyTo(System.IO.Path.Combine(destDirName, file.Name), true);
             }
-            foreach (DirectoryInfo subDirectory in directories)
+            foreach (DirInfo subDirectory in directories)
             {
-                string temppath = Path.Combine(destDirName, subDirectory.Name);
+                string temppath = System.IO.Path.Combine(destDirName, subDirectory.Name);
                 DirectoryCopyAndOverwrite(subDirectory.FullName, temppath);
             }
         }

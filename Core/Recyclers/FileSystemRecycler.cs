@@ -14,7 +14,7 @@ namespace Recyclers
 
         #region Private Fields
         private readonly FileSystemWatcher fsw;
-        private readonly HostService _service;
+        private readonly IHostService _service;
         private Action<string> _nameCallback = null;
 
         #endregion
@@ -73,7 +73,7 @@ namespace Recyclers
             _service.Stop();
         }
 
-        private void RecycleOnConfigChange(HostService host)
+        private void RecycleOnConfigChange(IHostService host)
         {
             DateTime lastEventTime = DateTime.Now;
 
@@ -86,7 +86,6 @@ namespace Recyclers
                          Thread.Sleep(RecycleDelay);
                      }
                      lastEventTime = DateTime.Now;
-                     Console.WriteLine("Recycling!");
                      host.Recycle();
                      if (NameCallback != null)
                      {

@@ -12,5 +12,6 @@ namespace NoDowntime.Wrappers
         bool Exists(string path);
         void CreateDirectory(string destDirName);
         void Delete(string destDirName, bool v);
+        DirInfo Get(string sourceDirName);
     }
 }

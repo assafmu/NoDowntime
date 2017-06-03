@@ -28,5 +28,10 @@ namespace NoDowntime.Wrappers
         {
             return System.IO.Directory.Exists(path);
         }
+
+        public DirInfo Get(string sourceDirName)
+        {
+            return new DirInfo(new DirectoryInfo(sourceDirName));
+        }
     }
 }

@@ -49,9 +49,13 @@
   <ItemGroup>
     <Compile Include="HostService.cs" />
     <Compile Include="HotFolders.cs" />
+    <Compile Include="IHostService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Wrappers\AppDomainFactory.cs" />
+    <Compile Include="Wrappers\ApplicationDomain.cs" />
     <Compile Include="Wrappers\Configuration.cs" />
     <Compile Include="Wrappers\Directory.cs" />
+    <Compile Include="Wrappers\DirInfo.cs" />
     <Compile Include="Wrappers\IConfiguration.cs" />
     <Compile Include="Wrappers\IDirectory.cs" />
   </ItemGroup>
