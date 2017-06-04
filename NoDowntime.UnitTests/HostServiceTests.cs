@@ -78,8 +78,50 @@ namespace NoDowntime.UnitTests
             var appSettings = new System.Collections.Specialized.NameValueCollection();
             appSettings["NoDowntime.RefreshedConfigurationSections"] = "a;b";
             _config.Setup(c => c.AppSettings).Returns(appSettings).Verifiable();
+            _config.Setup(c => c.GetSection("a")).Returns(new object());
+            _config.Setup(c => c.GetSection("b")).Returns(new object());
             _config.Setup(c => c.RefreshSection("a")).Verifiable();
             _config.Setup(c => c.RefreshSection("b")).Verifiable();
+            _hostService.Initialize();
+            _config.VerifyAll();
+
+        }
+
+        [TestMethod]
+        public void HostService_Initialize_StagingEmptyLoadsFromFirstFolder()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        [TestMethod]
+        public void HostService_Initialize_StagingAndFirstEmptyLoadsFromSecondFolder()
+        {
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
+        public void HostService_Initialize_AllFolderEmptyExceptionThrown()
+        {
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
+        public void HostService_Initialize_ClearsStagingFolder()
+        {
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
+        public void HostService_Initialize_ServiceStarted()
+        {
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
+        public void HostService_GetName_ReturnsCurrentServiceName()
+        {
+            throw new NotImplementedException();
         }
     }
 }
