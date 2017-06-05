@@ -89,11 +89,16 @@ namespace NoDowntime
             }
             else if (DirectoryExistsAndNotEmpty(_folders.CurrentDirectory))
             {
-                Load(_folders.NextDirectory, _folders.CurrentDirectory);
+                Load(_folders.CurrentDirectory, _folders.NextDirectory);
+            }
+            else if (DirectoryExistsAndNotEmpty(_folders.NextDirectory))
+            {
+                _folders.Swap();
+                Load(_folders.CurrentDirectory, _folders.NextDirectory);
             }
             else
             {
-                Load(_folders.CurrentDirectory, _folders.NextDirectory);
+                throw new Exception("No dlls available for loading");
             }
             SwitchServiceAndDomain();
         }

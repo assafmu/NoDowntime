@@ -20,7 +20,7 @@ namespace NoDowntime.UnitTests
         private Mock<IRecycableService> _service;
         private string _stagingFolder = "staging";
         private string _area1 = "1";
-        private string area2 = "2";
+        private string _area2 = "2";
         private string _className;
         private string _dllName;
         private string _dllFileName;
@@ -107,8 +107,10 @@ namespace NoDowntime.UnitTests
         [TestMethod]
         public void HostService_Initialize_StagingEmptyLoadsFromFirstFolder()
         {
-            _directory.Setup(dir => dir.Exists(_stagingFolder)).Returns(true);
+            _directory.Setup(dir => dir.Exists(_stagingFolder)).Returns(false);
             _directory.Setup(dir => dir.EnumerateFileSystemEntries(_stagingFolder)).Returns(new string[0]);
+            _directory.Setup(dir => dir.Exists(_area1)).Returns(true);
+            _directory.Setup(dir => dir.EnumerateFileSystemEntries(_area1)).Returns(new string[] { _dllFileName });
             _stagingDir.Setup(dir => dir.GetFiles()).Returns(new FileInfo[0]);
 
             var area1Dir = new Mock<DirInfo>();
@@ -122,18 +124,42 @@ namespace NoDowntime.UnitTests
             _stagingDir.Verify();
             area1Dir.VerifyAll();
         }
-
-
+        
         [TestMethod]
         public void HostService_Initialize_StagingAndFirstEmptyLoadsFromSecondFolder()
         {
-            throw new NotImplementedException();
+            _directory.Setup(dir => dir.Exists(_stagingFolder)).Returns(false);
+            _directory.Setup(dir => dir.EnumerateFileSystemEntries(_stagingFolder)).Returns(new string[0]);
+            _directory.Setup(dir => dir.Exists(_area1)).Returns(true);
+            _directory.Setup(dir => dir.EnumerateFileSystemEntries(_area1)).Returns(new string[0]);
+            _directory.Setup(dir => dir.Exists(_area2)).Returns(true);
+            _directory.Setup(dir => dir.EnumerateFileSystemEntries(_area2)).Returns(new string[] { _dllFileName });
+
+            var area2Dir = new Mock<DirInfo>();
+            _directory.Setup(dir => dir.Get(_area2)).Returns(area2Dir.Object).Verifiable();
+            area2Dir.Setup(dir => dir.GetDirectories()).Returns(new DirInfo[0]).Verifiable();
+            area2Dir.Setup(dir => dir.GetFiles()).Returns(new FileInfo[] { _dllInfo.Object }).Verifiable();
+            _dllInfo.Setup(file => file.Name).Returns(_dllFileName).Verifiable();
+
+            _hostService.Initialize();
+            _directory.Verify();
+            _stagingDir.Verify();
+            area2Dir.VerifyAll();
         }
 
         [TestMethod]
         public void HostService_Initialize_AllFolderEmptyExceptionThrown()
         {
-            throw new NotImplementedException();
+            _directory.Reset();
+            _directory.Setup(dir => dir.Exists(_stagingFolder)).Returns(false);
+            _directory.Setup(dir => dir.Exists(_area1)).Returns(true);
+            _directory.Setup(dir => dir.EnumerateFileSystemEntries(_area1)).Returns(new string[0]);
+            _directory.Setup(dir => dir.Exists(_area2)).Returns(true);
+            _directory.Setup(dir => dir.EnumerateFileSystemEntries(_area2)).Returns(new string[0]);
+
+            Action initialization = _hostService.Initialize;
+            initialization.ShouldThrow<Exception>().And.Message.Should().Contain("available for loading");
+            _directory.VerifyAll();
         }
 
         [TestMethod]
