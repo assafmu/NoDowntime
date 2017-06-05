@@ -140,7 +140,7 @@ namespace NoDowntime
             {
                 DirectoryCopyAndOverwrite(librariesDirectory, targetDirectory);
             }
-            EmptyStagingFolder();
+            EmptyDirectory(_stagingFolder);
             _config.RefreshSection("appSettings");
             RefreshAdditionalConfigurationSections();
             _nextDomain = _appDomainFactory.CreateDomain("Ad2", null, _info);
@@ -174,13 +174,13 @@ namespace NoDowntime
             _nextService = null;
         }
 
-        private void EmptyStagingFolder()
+        private void EmptyDirectory(string directory)
         {
-            if (!DirectoryExistsAndNotEmpty(_stagingFolder))
+            if (!DirectoryExistsAndNotEmpty(directory))
             {
                 return;
             }
-            DirInfo di = _directoryWrapper.Get(_stagingFolder);
+            DirInfo di = _directoryWrapper.Get(directory);
 
             foreach (FileInfo file in di.GetFiles())
             {
