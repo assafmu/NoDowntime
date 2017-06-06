@@ -17,6 +17,7 @@ namespace NoDowntime.UnitTests
         private Mock<DirInfo> _stagingDir;
         private Mock<FileInfo> _dllInfo;
         private Mock<IApplicationDomain> _appDomain;
+        private Mock<RemoteFactory> _remoteFactory;
         private Mock<IRecycableService> _service;
         private string _stagingFolder = "staging";
         private string _area1 = "1";
@@ -37,6 +38,8 @@ namespace NoDowntime.UnitTests
             _stagingDir = new Mock<DirInfo>();
             _dllInfo = new Mock<FileInfo>();
             _appDomain = new Mock<IApplicationDomain>();
+            _service = new Mock<IRecycableService>();
+            _remoteFactory = new Mock<RemoteFactory>();
             InitializeConfiguration();
             InitializeFileSystem();
             InitializeRecycableService();
@@ -63,11 +66,10 @@ namespace NoDowntime.UnitTests
         public void InitializeRecycableService()
         {
             _domainFactory.Setup(factory => factory.CreateDomain(It.IsAny<string>(), null, It.IsAny<AppDomainSetup>())).Returns(_appDomain.Object);
-            _service = new Mock<IRecycableService>();
-            var remoteFactory = Mock.Of<RemoteFactory>(rf => rf.Create(It.IsAny<string>(), _dllName, _className, It.IsAny<object[]>()) == _service.Object);
-            _appDomain.Setup(domain => domain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory")).Returns(remoteFactory);
+            _appDomain.Setup(domain => domain.CreateInstanceAndUnwrap("Connector", "Connector.RemoteFactory")).Returns(_remoteFactory.Object);
+            _remoteFactory.Setup(rf => rf.Create(It.IsAny<string>(), _dllName, _className, It.IsAny<object[]>())).Returns(_service.Object);
         }
-
+        #region Initialization
         [TestMethod]
         public void HostService_Initialize_NoException()
         {
@@ -93,11 +95,10 @@ namespace NoDowntime.UnitTests
         [TestMethod]
         public void HostService_Initiailize_LoadsFromStagingFolder()
         {
-            string area1 = "1";
-            _dllInfo.Setup(info => info.CopyTo(area1+"\\"+_dllFileName, true));
-            _directory.Setup(dir => dir.Exists(area1)).Returns(true);
-            _directory.Setup(dir => dir.Delete(area1, true));
-            _directory.Setup(dir => dir.CreateDirectory(area1));
+            _dllInfo.Setup(info => info.CopyTo(_area1+"\\"+_dllFileName, true));
+            _directory.Setup(dir => dir.Exists(_area1)).Returns(true);
+            _directory.Setup(dir => dir.Delete(_area1, true));
+            _directory.Setup(dir => dir.CreateDirectory(_area1));
 
             _hostService.Initialize();
             _dllInfo.VerifyAll();
@@ -190,6 +191,41 @@ namespace NoDowntime.UnitTests
             string name = _hostService.GetName();
             name.Should().Be(serviceName);
             _service.VerifyAll();
+        }
+        #endregion
+        [TestMethod]
+        public void HostService_Recycle_CopiesDllsFromStagingToArea2()
+        {
+            _hostService.Initialize();
+            _directory.Reset();
+            _stagingDir.Reset();
+            _service.Reset();
+            _dllInfo.Setup(info => info.CopyTo(_area2 + "\\" + _dllFileName, true));
+            _directory.Setup(dir => dir.Exists(_area2)).Returns(true);
+            _directory.Setup(dir => dir.Delete(_area2, true));
+            _directory.Setup(dir => dir.CreateDirectory(_area2));
+            _service = new Mock<IRecycableService>();
+            InitializeFileSystem();
+            _hostService.Recycle();
+            _dllInfo.VerifyAll();
+            _directory.VerifyAll();
+        }
+
+        [TestMethod]
+        public void HostService_Recycle_ServicesStoppedAndStarted()
+        {
+            _hostService.Initialize();
+            _directory.Reset();
+            _stagingDir.Reset();
+            _service.Reset();
+            var newService = new Mock<IRecycableService>();
+            _remoteFactory.Setup(rf => rf.Create(It.IsAny<string>(), _dllName, _className, It.IsAny<object[]>())).Returns(newService.Object);
+            InitializeFileSystem();
+            _hostService.Recycle();
+            _service.Verify(s => s.GetState());
+            _service.Verify(s => s.Stop());
+            newService.Verify(s => s.SetState(null));
+            newService.Verify(s => s.Start());
         }
     }
 }

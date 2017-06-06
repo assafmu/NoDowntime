@@ -114,6 +114,10 @@ namespace NoDowntime
             {
                 Load(_folders.CurrentDirectory, _folders.NextDirectory, state);
             }
+            else
+            {
+                throw new Exception("No dlls available for loading");
+            }
 
             Unload();
             _folders.Swap();
