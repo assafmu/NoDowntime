@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="HostService.cs" />
     <Compile Include="HotFolders.cs" />
+    <Compile Include="NoDowntimeConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
